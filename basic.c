@@ -48,7 +48,7 @@ float trace(float ox, float oy, float dx, float dy) {
         float sd = circleSDF(ox + dx * t, oy + dy * t, 0.5f, 0.5f, 0.1f);
         if (sd < EPSILON)
             return 2.0f;
-        t += sd;
+        t += sd;      // 之所以加sd而不是一个常数是为了尽早收敛(如果方向指向圆心, 至少需要行进sd才能到达圆心)
     }
     return 0.0f;
 }
@@ -86,11 +86,14 @@ char[] filename 图像文件路径
 *************************************************************************/
 void draw(int width, int height, char filename[])
 {
-    unsigned char img[width * height * 3];
+    // unsigned char img[width * height * 3];
+    unsigned char *img = malloc(sizeof(unsigned char) * width * height * 3);
     unsigned char* p = img;
     for (int y = 0; y < height; y++)
-        for (int x = 0; x < width; x++, p += 3)
+        for (int x = 0; x < width; x++, p += 3){
             p[0] = p[1] = p[2] = (int)(sample((float)x / width, (float)y / height) * 255.0f);
+            // printf("x=%f  y=%f sample=%f\n", (float)x / width, (float)y / height, sample((float)x / width, (float)y / height));
+        }
     svpng(fopen(filename, "wb"), width, height, img, 0);
 }
 
